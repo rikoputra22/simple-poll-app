@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Polling</title>
+    <link rel="stylesheet" href="/css/output.css">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+</head>
+<body class="text-slate-200 font-sans p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-4xl font-bold text-center text-white mb-8"><%= poll.question %></h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <div class="space-y-8">
+                <div class="bg-slate-800 rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-4 text-sky-400">Berikan Suara Anda</h2>
+                    <form action="/vote/<%= poll._id %>" method="POST">
+                        <div class="space-y-3">
+                            <% poll.options.forEach(option => { %>
+                                <label class="block p-4 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors has-[:checked]:bg-sky-600 has-[:checked]:border-sky-500">
+                                    <input type="radio" name="optionId" value="<%= option._id %>" class="hidden" required>
+                                    <span class="text-lg"><%= option.name %></span>
+                                </label>
+                            <% }) %>
+                        </div>
+                        <button type="submit" class="w-full mt-6 py-3 px-4 bg-sky-600 hover:bg-sky-700 rounded-md font-bold transition-colors">
+                            Kirim Suara
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-4 text-sky-400">Hasil Rinci (Tabel)</h2>
+                    <table class="w-full text-left">
+                        <thead class="border-b border-slate-600">
+                            <tr>
+                                <th class="p-3">Opsi</th>
+                                <th class="p-3 text-right">Jumlah Suara</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% poll.options.forEach(option => { %>
+                                <tr class="border-b border-slate-700">
+                                    <td class="p-3"><%= option.name %></td>
+                                    <td class="p-3 text-right font-mono"><%= option.votes %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <div class="bg-slate-800 rounded-xl shadow-lg p-6">
+                    <figure>
+                        <div id="bar-chart-container"></div>
+                    </figure>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl shadow-lg p-6">
+                    <figure>
+                        <div id="doughnut-chart-container"></div>
+                    </figure>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        // Ambil data yang sudah disiapkan dari server
+        const barChartData = JSON.parse('<%- barChartData %>');
+        const doughnutChartData = JSON.parse('<%- doughnutChartData %>');
+
+        // Opsi tema gelap untuk Highcharts
+        const darkThemeOptions = {
+            colors: ['#2dd4bf', '#38bdf8', '#f472b6', '#fb923c', '#a78bfa'],
+            chart: { backgroundColor: '#1e293b' },
+            title: { style: { color: '#e2e8f0' } },
+            subtitle: { style: { color: '#94a3b8' } },
+            legend: { itemStyle: { color: '#94a3b8' } },
+            xAxis: { labels: { style: { color: '#94a3b8' } }, gridLineColor: '#334155' },
+            yAxis: { labels: { style: { color: '#94a3b8' } }, gridLineColor: '#334155', title: { style: { color: '#94a3b8' } } },
+        };
+        Highcharts.setOptions(darkThemeOptions);
+
+        // Inisialisasi Grafik Batang (Bar Chart)
+        Highcharts.chart('bar-chart-container', {
+            chart: { type: 'bar' },
+            title: { text: 'Perbandingan Suara' },
+            xAxis: { categories: barChartData.categories, title: { text: null } },
+            yAxis: { min: 0, title: { text: 'Jumlah Suara', align: 'high' } },
+            plotOptions: { bar: { dataLabels: { enabled: true } } },
+            legend: { enabled: false },
+            credits: { enabled: false },
+            series: barChartData.series
+        });
+
+        // Inisialisasi Grafik Donat (Doughnut Chart)
+        Highcharts.chart('doughnut-chart-container', {
+            chart: { type: 'pie' },
+            title: { text: 'Distribusi Suara' },
+            tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    innerSize: '60%', // Ini yang membuatnya menjadi donat
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    }
+                }
+            },
+            credits: { enabled: false },
+            series: [{
+                name: 'Persentase',
+                colorByPoint: true,
+                data: doughnutChartData
+            }]
+        });
+
+    </script>
+</body>
+</html>
