@@ -34,8 +34,7 @@ Untuk menjalankan proyek ini di komputer lokal Anda, ikuti langkah-langkah berik
 
 1.  **Clone repositori ini:**
     ```bash
-    git clone [https://github.com/rikoputra22/simple-poll-app.git](https://github.com/rikoputra22/simple-poll-app.git)
-    cd simple-poll-app
+    git clone https://github.com/rikoputra22/simple-poll-app.git
     ```
 
 2.  **Install semua dependensi:**
